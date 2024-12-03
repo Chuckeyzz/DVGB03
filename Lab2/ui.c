@@ -12,8 +12,10 @@ void print_tree(BST T)
 	bfs(T, arr, max_n);
 	if(!T)
 		printf("\nTree is empty\n\n\n");
-	else
+	else{
+		preorder(T,arr);
 		print_2d(arr, max_n-1);
+	}
 	printf("Size:\t\t%d\n", size(T));
 	printf("Height:\t\t%d\n", height(T));
 	printf("Preorder:\t");	preorder(T,arr);		print_array(arr,size(T));
@@ -42,8 +44,26 @@ void print_array(int* a, int size)
 //-----------------------------------------------------------------------------
 void print_2d(int* a, int maxnodes)
 {
+	int height = ceil(log(maxnodes+1)/log(2));
+	int index = 0;
 	printf("\nTree 2d\n");
-	// TODO
+	
+	for(int i = 0; i < height; i++){
+		printf("\n");
+		for(int j = 0; j < pow(2,i); j++){
+			if(j==0){
+				for(int k = 0; k < height-i; k++){
+					printf("    ");
+				}
+			}
+			printf("%d", a[index]);
+			for(int k = 0; k < height-i; k++){
+				printf("    ");
+			}
+			index++;
+		}
+	}
+    
 	printf("\n");
 }
 //-----------------------------------------------------------------------------
