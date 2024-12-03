@@ -94,7 +94,7 @@ bool is_member(BST T, int val)
 //-----------------------------------------------------------------------------
 int height(BST T)
 {
-	return log(size(T)+1)/log(2); //Använder formeln Log(N+1) för att kalkulera height, delar med log(2) för att få log i bas 2
+	return ceil(log(size(T)+1)/log(2)); //Använder formeln Log(N+1) för att kalkulera height, delar med log(2) för att få log i bas 2
 }
 //-----------------------------------------------------------------------------
 // size: returns size of BST T
