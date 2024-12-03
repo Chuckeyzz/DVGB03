@@ -3,11 +3,14 @@
 //=============================================================================
 #include "global.h"
 #include "bst.h"
+#include <math.h>
 
 //-----------------------------------------------------------------------------
 // local function prototypes
 //-----------------------------------------------------------------------------
 static void _preorder(BST T, int* pos, int* a);
+static void _inorder(BST T, int* pos, int* a);
+static void _postorder(BST T, int* pos, int* a);
 //-----------------------------------------------------------------------------
 // public functions, exported through bst.h
 //-----------------------------------------------------------------------------
@@ -55,7 +58,9 @@ void preorder(BST T, int* a)
 //-----------------------------------------------------------------------------
 void inorder(BST T, int* a)
 {
-	// TODO
+	int pos = 0;
+	_inorder(T, &pos, a);
+	
 }
 //-----------------------------------------------------------------------------
 // postorder: puts the BST T values into array a in postorder
@@ -66,7 +71,8 @@ void inorder(BST T, int* a)
 //-----------------------------------------------------------------------------
 void postorder(BST T, int* a)
 {
-	// TODO
+	int pos = 0;
+	_postorder(T, &pos, a);
 }
 //-----------------------------------------------------------------------------
 // bfs: puts the BST T values into array a in bfs-order, non-nodes
@@ -93,16 +99,16 @@ bool is_member(BST T, int val)
 //-----------------------------------------------------------------------------
 int height(BST T)
 {
-	// TODO
-	return 0;
+	return ceil(log(size(T)+1)/log(2)); //Använder formeln Log(N+1) för att kalkulera height, delar med log(2) för att få log i bas 2
 }
 //-----------------------------------------------------------------------------
 // size: returns size of BST T
 //-----------------------------------------------------------------------------
 int size(BST T)
 {
-	// TODO
-	return 0;
+	if(!T) return 0;
+	
+	return 1 + size(T->LC) + size(T->RC); //Kalkulerar size rekursivt genom att gå igenom varje nods vänstra och högra sida tills dem returnerar 0
 }
 //-----------------------------------------------------------------------------
 // private helper functions, not exported
@@ -115,4 +121,20 @@ static void _preorder(BST T, int* pos, int* a)
 		_preorder(get_LC(T), pos, a);
 		_preorder(get_RC(T), pos, a);
 	}
+}
+static void _inorder(BST T, int* pos, int* a) {
+	if(T) {
+		_inorder(get_LC(T), pos, a);
+		a[(*pos)] = get_val(T);
+		(*pos)++;
+		_inorder(get_RC(T), pos, a);
+	}
+}
+static void _postorder(BST T, int* pos, int* a){
+	if(T){
+		_postorder(get_LC(T), pos, a);
+		_postorder(get_RC(T), pos, a);
+		a[(*pos)] = get_val(T);
+		(*pos)++;
+	}	
 }
