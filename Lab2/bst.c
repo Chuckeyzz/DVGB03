@@ -3,6 +3,7 @@
 //=============================================================================
 #include "global.h"
 #include "bst.h"
+#include <math.h>
 
 //-----------------------------------------------------------------------------
 // local function prototypes
@@ -93,16 +94,16 @@ bool is_member(BST T, int val)
 //-----------------------------------------------------------------------------
 int height(BST T)
 {
-	// TODO
-	return 0;
+	return log(size(T)+1)/log(2); //Använder formeln Log(N+1) för att kalkulera height, delar med log(2) för att få log i bas 2
 }
 //-----------------------------------------------------------------------------
 // size: returns size of BST T
 //-----------------------------------------------------------------------------
 int size(BST T)
 {
-	// TODO
-	return 0;
+	if(!T) return 0;
+	
+	return 1 + size(T->LC) + size(T->RC); //Kalkulerar size rekursivt genom att gå igenom varje nods vänstra och högra sida tills dem returnerar 0
 }
 //-----------------------------------------------------------------------------
 // private helper functions, not exported
