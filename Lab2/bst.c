@@ -9,6 +9,8 @@
 // local function prototypes
 //-----------------------------------------------------------------------------
 static void _preorder(BST T, int* pos, int* a);
+static void _inorder(BST T, int* pos, int* a);
+static void _postorder(BST T, int* pos, int* a);
 //-----------------------------------------------------------------------------
 // public functions, exported through bst.h
 //-----------------------------------------------------------------------------
@@ -56,7 +58,9 @@ void preorder(BST T, int* a)
 //-----------------------------------------------------------------------------
 void inorder(BST T, int* a)
 {
-	// TODO
+	int pos = 0;
+	_inorder(T, &pos, a);
+	
 }
 //-----------------------------------------------------------------------------
 // postorder: puts the BST T values into array a in postorder
@@ -67,7 +71,8 @@ void inorder(BST T, int* a)
 //-----------------------------------------------------------------------------
 void postorder(BST T, int* a)
 {
-	// TODO
+	int pos = 0;
+	_postorder(T, &pos, a);
 }
 //-----------------------------------------------------------------------------
 // bfs: puts the BST T values into array a in bfs-order, non-nodes
@@ -116,4 +121,20 @@ static void _preorder(BST T, int* pos, int* a)
 		_preorder(get_LC(T), pos, a);
 		_preorder(get_RC(T), pos, a);
 	}
+}
+static void _inorder(BST T, int* pos, int* a) {
+	if(T) {
+		_inorder(get_LC(T), pos, a);
+		a[(*pos)] = get_val(T);
+		(*pos)++;
+		_inorder(get_RC(T), pos, a);
+	}
+}
+static void _postorder(BST T, int* pos, int* a){
+	if(T){
+		_postorder(get_LC(T), pos, a);
+		_postorder(get_RC(T), pos, a);
+		a[(*pos)] = get_val(T);
+		(*pos)++;
+	}	
 }
