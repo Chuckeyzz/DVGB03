@@ -99,7 +99,17 @@ bool is_member(BST T, int val)
 //-----------------------------------------------------------------------------
 int height(BST T)
 {
-	return ceil(log(size(T)+1)/log(2)); //Använder formeln Log(N+1) för att kalkulera height, delar med log(2) för att få log i bas 2
+	if(!T) return 0;
+
+	//Vi räknar ut höjden på den vänstra sidan och den högra separat
+	int leftHeight = height(T->LC);
+    int rightHeight = height(T->RC);
+	
+	// Returnerar den längsta av ovanstående + startnoden
+	if (leftHeight > rightHeight)
+		return leftHeight + 1;
+	else
+		return rightHeight + 1;
 }
 //-----------------------------------------------------------------------------
 // size: returns size of BST T
