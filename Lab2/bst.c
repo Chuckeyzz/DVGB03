@@ -3,19 +3,28 @@
 //=============================================================================
 #include "global.h"
 #include "bst.h"
-#include <math.h>
 
 //-----------------------------------------------------------------------------
 // local function prototypes
 //-----------------------------------------------------------------------------
+typedef struct Queue {
+    BST* nodes;
+    int front;
+    int rear;
+    int size;
+} Queue;
 static void _preorder(BST T, int* pos, int* a);
 static void _inorder(BST T, int* pos, int* a);
 static void _postorder(BST T, int* pos, int* a);
 static void _bfs(BST T, int* pos, int* a, int max);
-Queue* createQueue(int capacity);
+
+static Queue* createQueue(int capacity);
 static void enqueue(Queue* q, BST node);
-BST dequeue(Queue* q);
-int isQueueEmpty(Queue* q);
+static BST dequeue(Queue* q);
+static int isQueueEmpty(Queue* q);
+static void removeElement(int *arr, int index, int size);
+
+
 //-----------------------------------------------------------------------------
 // public functions, exported through bst.h
 //-----------------------------------------------------------------------------
@@ -29,19 +38,44 @@ BST new_BST(int val)
 //-----------------------------------------------------------------------------
 BST bst_add(BST T, int v)
 {
-	return	!T            	?	new_BST(v)                            :
-		v < get_val(T)	?	cons(add(get_LC(T), v), T, get_RC(T)) :
-		v > get_val(T)	?	cons(get_LC(T), T, add(get_RC(T), v)) :
-		/* duplicate */		T;
+	return	!T          ?	new_BST(v)                                    :
+		v < get_val(T)	?	cons(add(get_LC(T), v), T, get_RC(T))         :
+		v > get_val(T)	?	cons(get_LC(T), T, add(get_RC(T), v))         :
+		T;	//for when we have a duplicate
 }
 //-----------------------------------------------------------------------------
 // bst_rem: removes the value val from the BST (if it exists)
 //-----------------------------------------------------------------------------
+//this soloution works, fix if time 
+
 BST bst_rem(BST T, int val)
 {
 	if(!T) return 0;
-	return T;
+	bool valDeleted = false;
+	int treeSize = size(T);
+	int *arr = malloc(treeSize * sizeof (int));
+	preorder(T,arr);
+	BST newTree = new_BST(arr[0]);
+	for (int i = 0; i < treeSize; i++){
+		 if (val == arr[i]){
+			 removeElement(arr, i, treeSize);
+			 treeSize--;
+			 valDeleted = true;
+		 }
+	}
+	if(valDeleted){
+		for(int i = 1; i < treeSize; i++){
+			bst_add(newTree, arr[i]);
+			}
+		return newTree;
+	}
+	else{
+		printf("Value does not exist in tree\n");
+		return T;
+	}
+
 }
+
 //-----------------------------------------------------------------------------
 // preorder: puts the BST T values into array a in preorder
 //-----------------------------------------------------------------------------
@@ -154,26 +188,6 @@ static void _postorder(BST T, int* pos, int* a){
 		(*pos)++;
 	}	
 }
-/*static void _bfs(BST T, int* pos, int* a, int max){
-	if(T){
-		Queue* q = createQueue(max);
-		enqueue(q, T);
-
-		while (!isQueueEmpty(q) && *pos < max) {
-	        BST node = dequeue(q);
-	        if (node != NULL) {
-                a[(*pos)++] = node->val; // Store the value of the current node
-
-                // Enqueue left and right children (even if NULL)
-                enqueue(q, node->LC); 
-                enqueue(q, node->RC); 
-            } else {
-                // If the node is NULL, add the placeholder value (X)
-                a[(*pos)++] = X;
-            }
-	    }
-	}
-}*/
 
 static void _bfs(BST T, int* pos, int* a, int max) {
     if (T) {
@@ -207,7 +221,8 @@ static void _bfs(BST T, int* pos, int* a, int max) {
     }
 }
 
-Queue* createQueue(int capacity) {
+static Queue* createQueue(int capacity) {
+
     Queue* q = (Queue*)malloc(sizeof(Queue));
     q->nodes = (BST*)malloc(capacity * sizeof(BST));
     q->front = q->rear = 0;
@@ -216,15 +231,34 @@ Queue* createQueue(int capacity) {
 }
 
 // Dequeue function
-BST dequeue(Queue* q) {
+
+static BST dequeue(Queue* q) {
+
     return q->nodes[q->front++];
 }
 
 // Check if the queue is empty
-int isQueueEmpty(Queue* q) {
+
+static int isQueueEmpty(Queue* q) {
+
     return q->front == q->rear;
 }
 
 static void enqueue(Queue* q, BST node) {
-    q->nodes[q->rear++] = node;
+
+	if (q->rear < q->size) { // Check for queue overflow
+		q->nodes[q->rear++] = node;
+	}
+}
+
+static void removeElement(int *arr, int index, int size){
+	if(index < 0 || index >= size){
+		printf("index %d\n", index);
+		printf("Index out of bounds\n");
+		return;
+	}
+	for (int i = index; i < size; i++){
+		arr[i] = arr[i + 1];
+	}
+
 }
