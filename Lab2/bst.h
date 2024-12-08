@@ -18,5 +18,4 @@ void inorder(BST node, int* a);
 void postorder(BST node, int* a);
 void bfs(BST T, int* a, int max);
 
-
 #endif
