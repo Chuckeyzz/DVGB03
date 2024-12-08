@@ -17,4 +17,11 @@ void preorder(BST node, int* a);
 void inorder(BST node, int* a);
 void postorder(BST node, int* a);
 void bfs(BST T, int* a, int max);
+typedef struct Queue {
+    BST* nodes;
+    int front;
+    int rear;
+    int size;
+} Queue;
+
 #endif

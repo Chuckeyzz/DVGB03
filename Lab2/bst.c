@@ -11,6 +11,11 @@
 static void _preorder(BST T, int* pos, int* a);
 static void _inorder(BST T, int* pos, int* a);
 static void _postorder(BST T, int* pos, int* a);
+static void _bfs(BST T, int* pos, int* a, int max);
+Queue* createQueue(int capacity);
+static void enqueue(Queue* q, BST node);
+BST dequeue(Queue* q);
+int isQueueEmpty(Queue* q);
 //-----------------------------------------------------------------------------
 // public functions, exported through bst.h
 //-----------------------------------------------------------------------------
@@ -34,7 +39,7 @@ BST bst_add(BST T, int v)
 //-----------------------------------------------------------------------------
 BST bst_rem(BST T, int val)
 {
-	// TODO
+	if(!T) return 0;
 	return T;
 }
 //-----------------------------------------------------------------------------
@@ -84,7 +89,8 @@ void postorder(BST T, int* a)
 //-----------------------------------------------------------------------------
 void bfs(BST T, int* a, int max)
 {
-	// TODO
+	int pos = 0;
+	_bfs(T, &pos, a, max);
 }
 //-----------------------------------------------------------------------------
 // is_member: checks if value val is member of BST T
@@ -147,4 +153,78 @@ static void _postorder(BST T, int* pos, int* a){
 		a[(*pos)] = get_val(T);
 		(*pos)++;
 	}	
+}
+/*static void _bfs(BST T, int* pos, int* a, int max){
+	if(T){
+		Queue* q = createQueue(max);
+		enqueue(q, T);
+
+		while (!isQueueEmpty(q) && *pos < max) {
+	        BST node = dequeue(q);
+	        if (node != NULL) {
+                a[(*pos)++] = node->val; // Store the value of the current node
+
+                // Enqueue left and right children (even if NULL)
+                enqueue(q, node->LC); 
+                enqueue(q, node->RC); 
+            } else {
+                // If the node is NULL, add the placeholder value (X)
+                a[(*pos)++] = X;
+            }
+	    }
+	}
+}*/
+
+static void _bfs(BST T, int* pos, int* a, int max) {
+    if (T) {
+        Queue* q = createQueue(max);
+        enqueue(q, T);
+
+        while (!isQueueEmpty(q) && *pos < max) {
+            BST node = dequeue(q);
+
+            if (node != NULL) {
+                // Add the current node's value
+                a[(*pos)++] = node->val;
+
+                // Enqueue left and right children (even if NULL)
+                enqueue(q, node->LC);
+                enqueue(q, node->RC);
+            } else {
+                // Add placeholder ('*') for missing children
+                a[(*pos)++] = X;
+
+                // Still enqueue NULLs to maintain tree structure
+                if (*pos + 1 < max) {
+                    enqueue(q, NULL); // Placeholder left
+                    enqueue(q, NULL); // Placeholder right
+                }
+            }
+        }
+
+        free(q->nodes);
+        free(q);
+    }
+}
+
+Queue* createQueue(int capacity) {
+    Queue* q = (Queue*)malloc(sizeof(Queue));
+    q->nodes = (BST*)malloc(capacity * sizeof(BST));
+    q->front = q->rear = 0;
+    q->size = capacity;
+    return q;
+}
+
+// Dequeue function
+BST dequeue(Queue* q) {
+    return q->nodes[q->front++];
+}
+
+// Check if the queue is empty
+int isQueueEmpty(Queue* q) {
+    return q->front == q->rear;
+}
+
+static void enqueue(Queue* q, BST node) {
+    q->nodes[q->rear++] = node;
 }
