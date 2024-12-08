@@ -12,8 +12,9 @@ void print_tree(BST T)
 	bfs(T, arr, max_n);
 	if(!T)
 		printf("\nTree is empty\n\n\n");
-	else
+	else{
 		print_2d(arr, max_n-1);
+	}
 	printf("Size:\t\t%d\n", size(T));
 	printf("Height:\t\t%d\n", height(T));
 	printf("Preorder:\t");	preorder(T,arr);		print_array(arr,size(T));
@@ -42,9 +43,36 @@ void print_array(int* a, int size)
 //-----------------------------------------------------------------------------
 void print_2d(int* a, int maxnodes)
 {
+	int height = ceil(log(maxnodes+1)/log(2));
+	int index = 0;
+	int indent = height*5;
+	int spaces = indent*2;
+	
 	printf("\nTree 2d\n");
-	// TODO
-	printf("\n");
+	
+	for(int i = 0; i < height; i++){
+		printf("\n");
+		for(int j = 0; j < pow(2,i); j++){
+			if(j==0){
+				for(int k = 0; k < indent; k++){
+					printf(" ");
+				}
+			}
+			if(a[index] == -42){
+				printf("*");
+			}else{
+				printf("%d", a[index]);
+			}
+			for(int k = 0; k < spaces; k++){
+				printf(" ");
+			}
+			index++;
+		}
+		indent = indent/2;
+		spaces = spaces/2;
+	}
+    
+	printf("\n\n");
 }
 //-----------------------------------------------------------------------------
 // prints the menu
@@ -103,6 +131,12 @@ BST ui_rem(BST T)
 	int val;
 	do{
 		val = get_int("Enter value to be deleted> ");
+		
+		if(!T){
+			printf("Tree is empty\n");
+			return 0;
+		}
+		
 		if(val == X)printf("Error: not allowed in tree\n");
 	}while(val == X);
 	if(echo)printf("%d\n", val);
