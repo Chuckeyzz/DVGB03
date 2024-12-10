@@ -17,13 +17,11 @@ static void _preorder(BST T, int* pos, int* a);
 static void _inorder(BST T, int* pos, int* a);
 static void _postorder(BST T, int* pos, int* a);
 static void _bfs(BST T, int* pos, int* a, int max);
-
 static Queue* createQueue(int capacity);
 static void enqueue(Queue* q, BST node);
 static BST dequeue(Queue* q);
 static int isQueueEmpty(Queue* q);
 static void removeElement(int *arr, int index, int size);
-
 
 //-----------------------------------------------------------------------------
 // public functions, exported through bst.h
@@ -47,6 +45,8 @@ BST bst_add(BST T, int v)
 // bst_rem: removes the value val from the BST (if it exists)
 //-----------------------------------------------------------------------------
 //this soloution works, fix if time 
+//Martin says fix
+//make a new recursive souloution
 
 BST bst_rem(BST T, int val)
 {
@@ -73,7 +73,6 @@ BST bst_rem(BST T, int val)
 		printf("Value does not exist in tree\n");
 		return T;
 	}
-
 }
 
 //-----------------------------------------------------------------------------
@@ -131,8 +130,24 @@ void bfs(BST T, int* a, int max)
 //-----------------------------------------------------------------------------
 bool is_member(BST T, int val)
 {
-	// TODO
-	return 	false;
+	if(!T)
+		return false;
+	
+	return (val > get_val(T))    ?     is_member(get_RC(T), val)     :
+	       (val < get_val(T))    ?     is_member(get_LC(T), val)     :
+		   (val == get_val(T))   ?     true                          :
+		   false;
+
+//	if (val < get_val(T)){
+//		is_member(get_RC(T));
+//	}
+//	else if(val > get_val(T)){
+//		is_member(get_LC(T));
+//	}
+//	else if(val == get_val(T)){
+//		return true;
+//	}
+//	return false;
 }
 //-----------------------------------------------------------------------------
 // height: returns height of BST T
@@ -215,14 +230,12 @@ static void _bfs(BST T, int* pos, int* a, int max) {
                 }
             }
         }
-
         free(q->nodes);
         free(q);
     }
 }
 
 static Queue* createQueue(int capacity) {
-
     Queue* q = (Queue*)malloc(sizeof(Queue));
     q->nodes = (BST*)malloc(capacity * sizeof(BST));
     q->front = q->rear = 0;
@@ -231,21 +244,16 @@ static Queue* createQueue(int capacity) {
 }
 
 // Dequeue function
-
 static BST dequeue(Queue* q) {
-
     return q->nodes[q->front++];
 }
 
 // Check if the queue is empty
-
 static int isQueueEmpty(Queue* q) {
-
     return q->front == q->rear;
 }
 
 static void enqueue(Queue* q, BST node) {
-
 	if (q->rear < q->size) { // Check for queue overflow
 		q->nodes[q->rear++] = node;
 	}
@@ -260,5 +268,4 @@ static void removeElement(int *arr, int index, int size){
 	for (int i = index; i < size; i++){
 		arr[i] = arr[i + 1];
 	}
-
 }
