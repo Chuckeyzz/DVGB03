@@ -21,7 +21,8 @@ static Queue* createQueue(int capacity);
 static void enqueue(Queue* q, BST node);
 static BST dequeue(Queue* q);
 static int isQueueEmpty(Queue* q);
-static void removeElement(int *arr, int index, int size);
+static BST remove_root(BST T);
+static BST findMin(BST T);
 
 //-----------------------------------------------------------------------------
 // public functions, exported through bst.h
@@ -44,36 +45,15 @@ BST bst_add(BST T, int v)
 //-----------------------------------------------------------------------------
 // bst_rem: removes the value val from the BST (if it exists)
 //-----------------------------------------------------------------------------
-//this soloution works, fix if time 
-//Martin says fix
-//make a new recursive souloution
+
 
 BST bst_rem(BST T, int val)
 {
-	if(!T) return 0;
-	bool valDeleted = false;
-	int treeSize = size(T);
-	int *arr = malloc(treeSize * sizeof (int));
-	preorder(T,arr);
-	BST newTree = new_BST(arr[0]);
-	for (int i = 0; i < treeSize; i++){
-		 if (val == arr[i]){
-			 removeElement(arr, i, treeSize);
-			 treeSize--;
-			 valDeleted = true;
-		 }
-	}
-	if(valDeleted){
-		for(int i = 1; i < treeSize; i++){
-			bst_add(newTree, arr[i]);
-			}
-		return newTree;
-	}
-	else{
-		printf("Value does not exist in tree\n");
-		return T;
-	}
-}
+	return  !T                 ? T                                           :
+			(val < get_val(T)) ? cons(bst_rem(get_LC(T), val), T, get_RC(T)) :
+			(val > get_val(T)) ? cons(get_LC(T), T, bst_rem(get_RC(T), val)) :
+			remove_root(T);
+} 
 
 //-----------------------------------------------------------------------------
 // preorder: puts the BST T values into array a in preorder
@@ -157,8 +137,8 @@ int height(BST T)
 	if(!T) return 0;
 
 	//Vi räknar ut höjden på den vänstra sidan och den högra separat
-	int leftHeight = height(T->LC);
-    int rightHeight = height(T->RC);
+	int leftHeight = height(get_LC(T));
+    int rightHeight = height(get_RC(T));
 	
 	// Returnerar den längsta av ovanstående + startnoden
 	if (leftHeight > rightHeight)
@@ -259,13 +239,26 @@ static void enqueue(Queue* q, BST node) {
 	}
 }
 
-static void removeElement(int *arr, int index, int size){
-	if(index < 0 || index >= size){
-		printf("index %d\n", index);
-		printf("Index out of bounds\n");
-		return;
+static BST remove_root(BST T){
+	if(!get_LC(T) && !get_RC(T)){
+		return NULL;
+	}else if(get_LC(T) && !get_RC(T)){
+		return get_LC(T);
+	}else if(!get_LC(T) && get_RC(T)){
+		return get_RC(T);
+	}else{
+		
+		BST temp = findMin(get_RC(T));
+		set_val(T, get_val(temp));
+		set_RC(T, bst_rem(get_RC(T), get_val(temp)));
 	}
-	for (int i = index; i < size; i++){
-		arr[i] = arr[i + 1];
+	return T;
+}
+
+static BST findMin(BST T){
+	if(!T) return NULL;
+	while(get_LC(T) != NULL){
+		T = get_LC(T);
 	}
+	return T;
 }
