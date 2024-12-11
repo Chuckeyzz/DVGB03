@@ -21,7 +21,8 @@ static Queue* createQueue(int capacity);
 static void enqueue(Queue* q, BST node);
 static BST dequeue(Queue* q);
 static int isQueueEmpty(Queue* q);
-static void removeElement(int *arr, int index, int size);
+static BST remove_root(BST T);
+static BST findMin(BST T);
 
 //-----------------------------------------------------------------------------
 // public functions, exported through bst.h
@@ -51,28 +52,16 @@ BST bst_add(BST T, int v)
 BST bst_rem(BST T, int val)
 {
 	if(!T) return 0;
-	bool valDeleted = false;
-	int treeSize = size(T);
-	int *arr = malloc(treeSize * sizeof (int));
-	preorder(T,arr);
-	BST newTree = new_BST(arr[0]);
-	for (int i = 0; i < treeSize; i++){
-		 if (val == arr[i]){
-			 removeElement(arr, i, treeSize);
-			 treeSize--;
-			 valDeleted = true;
-		 }
+
+	if(val < get_val(T)){
+		return cons(bst_rem(get_LC(T), val), T, get_RC(T));
+	}else if(val > get_val(T)){
+		return cons(get_LC(T), T, bst_rem(get_RC(T), val));
+	}else{
+		return remove_root(T);
 	}
-	if(valDeleted){
-		for(int i = 1; i < treeSize; i++){
-			bst_add(newTree, arr[i]);
-			}
-		return newTree;
-	}
-	else{
-		printf("Value does not exist in tree\n");
-		return T;
-	}
+
+	return T;
 }
 
 //-----------------------------------------------------------------------------
@@ -259,13 +248,24 @@ static void enqueue(Queue* q, BST node) {
 	}
 }
 
-static void removeElement(int *arr, int index, int size){
-	if(index < 0 || index >= size){
-		printf("index %d\n", index);
-		printf("Index out of bounds\n");
-		return;
+static BST remove_root(BST T){
+	if(!get_LC(T) && !get_RC(T)){
+		return NULL;
+	}else if(get_LC(T) && !get_RC(T)){
+		return get_LC(T);
+	}else if(!get_LC(T) && get_RC(T)){
+		return get_RC(T);
+	}else{
+		BST temp = findMin(get_RC(T));
+		set_val(T, get_val(temp));
+		set_RC(T, bst_rem(get_RC(T), get_val(temp)));
 	}
-	for (int i = index; i < size; i++){
-		arr[i] = arr[i + 1];
+	return T;
+}
+
+static BST findMin(BST T){
+	while(T && get_LC(T)){
+		set_val(T, get_val(get_LC(T)));
 	}
+	return T;
 }
