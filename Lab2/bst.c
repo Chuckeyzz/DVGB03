@@ -49,11 +49,13 @@ BST bst_add(BST T, int v)
 
 BST bst_rem(BST T, int val)
 {
+
 	return  !T                 ? T                                           :
 			(val < get_val(T)) ? cons(bst_rem(get_LC(T), val), T, get_RC(T)) :
 			(val > get_val(T)) ? cons(get_LC(T), T, bst_rem(get_RC(T), val)) :
 			remove_root(T);
 } 
+
 
 //-----------------------------------------------------------------------------
 // preorder: puts the BST T values into array a in preorder
@@ -247,7 +249,8 @@ static BST remove_root(BST T){
 	}else if(!get_LC(T) && get_RC(T)){
 		return get_RC(T);
 	}else{
-		
+
+
 		BST temp = findMin(get_RC(T));
 		set_val(T, get_val(temp));
 		set_RC(T, bst_rem(get_RC(T), get_val(temp)));
@@ -256,6 +259,7 @@ static BST remove_root(BST T){
 }
 
 static BST findMin(BST T){
+
 	if(!T) return NULL;
 	while(get_LC(T) != NULL){
 		T = get_LC(T);
