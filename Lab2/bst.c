@@ -45,24 +45,17 @@ BST bst_add(BST T, int v)
 //-----------------------------------------------------------------------------
 // bst_rem: removes the value val from the BST (if it exists)
 //-----------------------------------------------------------------------------
-//this soloution works, fix if time 
-//Martin says fix
-//make a new recursive souloution
+
 
 BST bst_rem(BST T, int val)
 {
-	if(!T) return 0;
 
-	if(val < get_val(T)){
-		return cons(bst_rem(get_LC(T), val), T, get_RC(T));
-	}else if(val > get_val(T)){
-		return cons(get_LC(T), T, bst_rem(get_RC(T), val));
-	}else{
-		return remove_root(T);
-	}
+	return  !T                 ? T                                           :
+			(val < get_val(T)) ? cons(bst_rem(get_LC(T), val), T, get_RC(T)) :
+			(val > get_val(T)) ? cons(get_LC(T), T, bst_rem(get_RC(T), val)) :
+			remove_root(T);
+} 
 
-	return T;
-}
 
 //-----------------------------------------------------------------------------
 // preorder: puts the BST T values into array a in preorder
@@ -146,8 +139,8 @@ int height(BST T)
 	if(!T) return 0;
 
 	//Vi räknar ut höjden på den vänstra sidan och den högra separat
-	int leftHeight = height(T->LC);
-    int rightHeight = height(T->RC);
+	int leftHeight = height(get_LC(T));
+    int rightHeight = height(get_RC(T));
 	
 	// Returnerar den längsta av ovanstående + startnoden
 	if (leftHeight > rightHeight)
@@ -256,6 +249,8 @@ static BST remove_root(BST T){
 	}else if(!get_LC(T) && get_RC(T)){
 		return get_RC(T);
 	}else{
+
+
 		BST temp = findMin(get_RC(T));
 		set_val(T, get_val(temp));
 		set_RC(T, bst_rem(get_RC(T), get_val(temp)));
@@ -264,8 +259,10 @@ static BST remove_root(BST T){
 }
 
 static BST findMin(BST T){
-	while(T && get_LC(T)){
-		set_val(T, get_val(get_LC(T)));
+
+	if(!T) return NULL;
+	while(get_LC(T) != NULL){
+		T = get_LC(T);
 	}
 	return T;
 }

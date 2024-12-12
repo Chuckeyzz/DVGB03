@@ -11,8 +11,8 @@ static AVL slr(AVL T);
 static AVL drr(AVL T);
 static AVL dlr(AVL T);
 static AVL new_AVL(int val);
-//static AVL handleRC(AVL T, int val);
-//static AVL handleLC(AVL T, int val);
+static int isBalanced(AVL T);
+
 //=============================================================================
 // Public functions, exported via .h-file
 //-----------------------------------------------------------------------------
@@ -24,19 +24,11 @@ static AVL new_AVL(int val){
 }
 AVL avl_add(AVL T, int val) {
 
-//	int innerBalance = 0;
-//	int outerBalance = 0; //om höger ++ vänster om root --
-	
-	return	!T              ?	new_AVL(val)                                        :
-		val < get_val(T)	?	cons(avl_add(get_LC(T), val), T, get_RC(T))         :
-		val > get_val(T)	?	cons(get_LC(T), T, avl_add(get_RC(T), val))         :
-		T;	//for when we have a duplicate
-	
 	if(DEBUG)printf("avl_add (%d)\n",val);
-	//TODO
-
+	T = bst_add(T, val);
+	T = balance(T);
 	return T;
-	}
+}
 
 
 //-----------------------------------------------------------------------------
@@ -45,7 +37,8 @@ AVL avl_add(AVL T, int val) {
 AVL avl_rem(AVL T, int val)
 {
 	if(DEBUG)printf("avl_rem (%d)\n",val);
-	// TODO
+	T = bst_rem(T, val);
+	T = balance(T);
 	return T;
 }
 //-----------------------------------------------------------------------------
@@ -53,38 +46,63 @@ AVL avl_rem(AVL T, int val)
 //-----------------------------------------------------------------------------
 AVL balance(AVL T)
 {
-	return srr(slr(drr(dlr(T))));
+	int bCount = 0;
+	bCount = isBalanced(T);
+
+	//left heavy
+	if(bCount > 1){
+		//left left 
+		if(isBalanced(get_LC(T)) >= 0){
+			return srr(T);		
+		}
+		//left right
+		else {
+			return drr(T);	
+		}
+	}
+	//right heavy
+	if(bCount < -1){
+		//right right
+		if(isBalanced(get_RC(T)) <= 0){
+			return slr(T);
+		}
+		else{
+			//right left
+			return dlr(T);
+		}
+	}
+	return T;
 }
 //=============================================================================
 // Private functions, for local use only
 //-----------------------------------------------------------------------------
+static AVL slr(AVL T)                              //SLR (+outside right)
+{
+	if(DEBUG)printf("slr\n");
+	
+	AVL temp = get_RC(T);
+	set_RC(T, get_LC(temp));                       //set takes two parameters  (1 who wants the child, and 2 who gives it)
+	set_LC(temp, T);                       //set_LC (taker, giver)
+	return temp;
+	
+	//return T;
+}
 static AVL srr(AVL T)                               //SRR (+outside left)
 {
 	if(DEBUG)printf("srr\n");
 	
 	AVL temp = get_LC(T);
-	set_LC(temp, get_LC(T));                       //set takes two parameters  (1 who wants the child, and 2 who gives it)
-	set_RC(get_RC(temp), T);                       //set_LC (taker, giver)
+	set_LC(T, get_RC(temp));                       //set takes two parameters  (1 who wants the child, and 2 who gives it)
+	set_RC(temp, T);                       //set_LC (taker, giver)
 	return temp;
 	
 	//return T; ????
-}
-static AVL slr(AVL T)                              //SLR (+outside right)
-{
-	if(DEBUG)printf("slr\n");
-	
-	AVL temp = get_LC(T);
-	set_RC(temp, get_RC(T));                       //set takes two parameters  (1 who wants the child, and 2 who gives it)
-	set_LC(get_LC(temp), T);                       //set_LC (taker, giver)
-	return temp;
-	
-	//return T;
 }
 static AVL drr(AVL T)
 {
 	if(DEBUG)printf("drr\n");
 
-	set_LC(get_LC(T), slr(get_LC(T)));                    
+	set_LC(T, slr(get_LC(T)));                    
 	T = srr(T);                                           //perform right Single Right Rotation on T
 	
 	return T;
@@ -93,8 +111,14 @@ static AVL dlr(AVL T)
 {
 	if(DEBUG)printf("drr\n");
 	
-	set_RC(get_RC(T), srr(get_RC(T)));                    
+	set_RC(T, srr(get_RC(T)));                    
 	T = slr(T);                                           //perform right Single Left Rotation on T
 	
 	return T;
 }
+
+static int isBalanced(AVL T){
+	return  T ? (height(get_LC(T)) - height(get_RC(T))) :
+			0;
+}
+
