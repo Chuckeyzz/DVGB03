@@ -23,6 +23,7 @@ static BST dequeue(Queue* q);
 static int isQueueEmpty(Queue* q);
 static BST remove_root(BST T);
 static BST findMin(BST T);
+static BST findMax(BST T);
 
 //-----------------------------------------------------------------------------
 // public functions, exported through bst.h
@@ -249,11 +250,16 @@ static BST remove_root(BST T){
 	}else if(!get_LC(T) && get_RC(T)){
 		return get_RC(T);
 	}else{
-
-
-		BST temp = findMin(get_RC(T));
-		set_val(T, get_val(temp));
-		set_RC(T, bst_rem(get_RC(T), get_val(temp)));
+		BST temp;
+		if(height(get_RC(T)) > height(get_LC(T))){
+			temp = findMin(get_RC(T));
+			set_val(T, get_val(temp));
+			set_RC(T, bst_rem(get_RC(T), get_val(temp)));
+		}else{
+			temp = findMax(get_LC(T));
+            set_val(T, get_val(temp));
+            set_LC(T, bst_rem(get_LC(T), get_val(temp)));
+		}
 	}
 	return T;
 }
@@ -265,4 +271,13 @@ static BST findMin(BST T){
 		T = get_LC(T);
 	}
 	return T;
+}
+
+static BST findMax(BST T) {
+    if (!T) return NULL;
+
+    while (get_RC(T) != NULL) {
+        T = get_RC(T);
+    }
+    return T;
 }

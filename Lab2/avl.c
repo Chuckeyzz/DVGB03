@@ -10,7 +10,6 @@ static AVL srr(AVL T);
 static AVL slr(AVL T);
 static AVL drr(AVL T);
 static AVL dlr(AVL T);
-static AVL new_AVL(int val);
 static int isBalanced(AVL T);
 
 //=============================================================================
@@ -19,9 +18,6 @@ static int isBalanced(AVL T);
 //-----------------------------------------------------------------------------
 // avl_add: adds the value val to AVL T in a balanced fashion
 //-----------------------------------------------------------------------------
-static AVL new_AVL(int val){
-	return new_BT(val);
-}
 AVL avl_add(AVL T, int val) {
 
 	if(DEBUG)printf("avl_add (%d)\n",val);
