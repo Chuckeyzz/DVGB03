@@ -8,6 +8,8 @@ pedge _add_edge(pedge edge, char to, double weight);
 pedge _rem_edge(pedge edges, char to);
 void remove_all_edges_to(pnode G, char name);
 void remove_all_edges_from(pnode G, char name);
+//private helper functions
+static void print_graph_now(pnode G);
 
 // create_node: creates node with name nname
 pnode create_node(char nname)
@@ -84,7 +86,26 @@ pnode node_cons(pnode first, pnode second)
 pnode add_node(pnode G, char nname) {
 	//creates the node if node with the same name does not exist.
 	if(find_node(G, nname)) {return G;}
-	else					{return create_node(nname);}
+	
+	pnode new_node = create_node(nname); 
+	if(G == NULL){
+		//print_graph_now(G);
+		return new_node;
+	}
+	if(get_name(new_node) < get_name(G)) {
+		new_node->next_node = G;
+		//print_graph_now(G);
+		return new_node;
+	}
+	pnode current = G;
+	while (current->next_node != NULL && get_name(current->next_node) < get_name(new_node)) {
+		current = current->next_node;
+		//print_graph_now(G);
+	}
+	new_node->next_node = get_next(current);
+	current->next_node = new_node;
+	//print_graph_now(G);
+	return G;
 }
 
 // rem_node: removes node with name name from adjacency list G
@@ -98,9 +119,15 @@ pnode rem_node(pnode G, char name)
 pnode get_node(pnode G, char name)
 {
 	if(find_node(G, name)){
-		
+		while (G != NULL){
+			if(get_name(G) == name) {
+				return G;
+			}
+			G = get_next(G);
+		}
 	}
-	return G;
+	printf("Node not in list.\n");
+	return NULL;
 }
 // get_node: returns true if node with name name exists in adjacency list G
 //           false otherwise
@@ -233,8 +260,14 @@ void remove_all_edges_from(pnode G, char name)
 // node_cardinality: returns the number of nodes in G
 int node_cardinality(pnode G)
 {
-	// TODO
-	return 0;
+	int counter = 0;
+	while(G != NULL) {
+		counter++;
+		G = get_next(G);
+		printf("count is %d \n",counter);
+	}
+	printf("Final count is %d \n",counter);
+	return counter;
 }
 // name_to_pos: returns position of node with name c, -1 if not found
 int name_to_pos(pnode G, char c)
@@ -252,4 +285,12 @@ char pos_to_name(pnode G, int pos)
 void list_to_matrix(pnode G, double matrix[MAXNODES][MAXNODES])
 {
 	// TODO
+}
+
+//helper for printing the nodes, almost working
+static void print_graph_now(pnode G){
+	while (G != NULL){
+		printf("%c -> ", get_name(G));
+		G = G->next_node;
+	}
 }
