@@ -81,11 +81,12 @@ pnode node_cons(pnode first, pnode second)
 // add_node: adds a new node with name nname to adjacency list G
 //           in lexicographical order. If it already exists
 //           in graph, nothing is done
-pnode add_node(pnode G, char nname)
-{
-	// TODO
-	return G;
+pnode add_node(pnode G, char nname) {
+	//creates the node if node with the same name does not exist.
+	if(find_node(G, nname)) {return G;}
+	else					{return create_node(nname);}
 }
+
 // rem_node: removes node with name name from adjacency list G
 //           if node does not exist, nothing happens
 pnode rem_node(pnode G, char name)
@@ -96,16 +97,18 @@ pnode rem_node(pnode G, char name)
 // get_node: returns pointer to node with name name from adjacency list G
 pnode get_node(pnode G, char name)
 {
-	// TODO
+	if(find_node(G, name)){
+		
+	}
 	return G;
 }
 // get_node: returns true if node with name name exists in adjacency list G
 //           false otherwise
 bool find_node(pnode G, char name)
-{
-	return is_empty(G)	   ? false :
-	       get_name(G) == name ? true :
-				     find_node(G->next_node, name);
+{ 
+	return is_empty(G)	       ? false  :
+	       get_name(G) == name ? true   :
+		   find_node(G->next_node, name);
 }
 // create_edge: creates edge
 pedge create_edge(char to, double weight)
