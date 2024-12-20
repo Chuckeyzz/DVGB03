@@ -266,7 +266,7 @@ int node_cardinality(pnode G)
 		G = get_next(G);
 		printf("count is %d \n",counter);
 	}
-	printf("Final count is %d \n",counter);
+	//printf("Final count is %d \n",counter);
 	return counter;
 }
 // name_to_pos: returns position of node with name c, -1 if not found
@@ -279,7 +279,10 @@ int name_to_pos(pnode G, char c)
 char pos_to_name(pnode G, int pos)
 {
 	// TODO
-	return '-';
+	for(int i = 0; i < pos; i++){
+		G = get_next(G);
+	}
+	return get_name(G);
 }
 // list_to_pos: creates adjacency matrix from adjacency list
 void list_to_matrix(pnode G, double matrix[MAXNODES][MAXNODES])
