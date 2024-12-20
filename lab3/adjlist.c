@@ -112,7 +112,10 @@ pnode add_node(pnode G, char nname) {
 //           if node does not exist, nothing happens
 pnode rem_node(pnode G, char name)
 {
-	// TODO
+	if(!find_node(G, name)) return 0;
+
+	G = get_next(G);
+	
 	return G;
 }
 // get_node: returns pointer to node with name name from adjacency list G
@@ -278,7 +281,6 @@ int name_to_pos(pnode G, char c)
 // pos_to_name: returns name of node at position pos in G
 char pos_to_name(pnode G, int pos)
 {
-	// TODO
 	for(int i = 0; i < pos; i++){
 		G = get_next(G);
 	}
