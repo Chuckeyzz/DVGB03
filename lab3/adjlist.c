@@ -193,20 +193,30 @@ pedge upd_edge(pedge E, double weight)
 // _add_edge: creates and connects new edge to edge-list
 pedge _add_edge(pedge E, char to, double weight)
 {
-	// TODO
+	E = create_edge(to, weight);
 	return E;
 }
 // add_edge: adds an edge to G by finding correct start node
 //           and then calling _add_edge to create new edge
 void add_edge(pnode G, char from, char to, double weight)
 {
+	//Traverse the nodes until we are on the correct from-node
 	while(get_name(G) != from){
 		G = get_next(G);
 	}
 
-	pedge E = create_edge(to, weight);
-	E = _add_edge(E, to, weight);
-	set_edges(G, E);
+	pedge E = get_edges(G);
+	
+	if(E == NULL){	
+		E = create_edge(to, weight);
+		set_edges(G, E);
+	}else{
+		while(get_next_edge(E) != NULL){ //Traverse the edge-list to the end
+			E = get_next_edge(E);
+		}
+		
+		E->next_edge = _add_edge(E, to, weight);
+	}
 }
 // _find_edge: finds edge in edge-list
 bool _find_edge(pedge E, char to)
@@ -231,13 +241,13 @@ int edge_cardinality(pnode G)
 {
 	int counter = 0;
 	while(G != NULL) {
-		pedge E = get_edges(G);
-		while(E != NULL){
+		pedge E = get_edges(G); //Get the first edge in the nodes edge-list
+		while(E != NULL){ //Traverse the edge-list
 			counter++;
-			E = get_edges(G)->next_edge;
+			//printf("count is %d \n",counter);
+			E = get_next_edge(E);
 		}
 		G = get_next(G);
-		//printf("count is %d \n",counter);
 	}
 	//printf("Final count is %d \n",counter);
 	return counter;
