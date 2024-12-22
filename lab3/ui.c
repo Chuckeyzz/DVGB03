@@ -45,8 +45,11 @@ void print_graph(pnode G)
 			for (int k = 0; k < n; k++){
 				if(get_edges(rowNode) != NULL && rowNode != columnNode){
 					pedge E = get_edges(rowNode);
-					if(E->to == get_name(columnNode)){
-						M[i][k] = E->weight;
+					while(E != NULL){
+						if(E->to == get_name(columnNode)){
+							M[i][k] = E->weight;
+						}
+						E = E->next_edge;
 					}
 				}else{
 					M[i][k] = INFINITY;
