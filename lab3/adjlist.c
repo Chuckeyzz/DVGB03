@@ -256,16 +256,46 @@ int self_loops(pnode G)
 	// TODO
 	return 0;
 }
-// _rem_edge: removes edge from edge-list
+// _rem_edge: removes edge from edge-list (Currently not used)
 pedge _rem_edge(pedge E, char to)
 {
-	// TODO
+	E->next_edge = get_next_edge(get_next_edge(E));
 	return E;
 }
 // rem_edge: removes edge from G
 void rem_edge(pnode G, char from, char to)
 {
-	// TODO
+	
+	//Loop through the nodes until we find the one that the edge goes from
+	while(get_name(G) != from){
+		G = get_next(G);
+
+		//Get out of possible infinite loop
+		if(G == NULL){
+			return;
+		}
+	}
+
+	//Get the first edge from the node
+	pedge E = get_edges(G);
+	pedge prevE = NULL;
+	
+	//Check if that edge is the one we want to delete by checking if the to value of that edge is the to value from the parameter
+	if(get_to(E) == to){
+		set_edges(G, get_next_edge(E)); //if that is the case just make the edge after that in the edge-list the new edges value for the node
+	}else{
+		while(E != NULL && get_to(E) != to){ //Else if it is not the first edge in the edge list, traverse the edge-list to find the edge and save the edge before to prevE
+			prevE = E;
+			E = get_next_edge(E);
+		}
+
+		//Get out of possible infinite loop
+		if(E == NULL){
+			return;
+		}
+		
+		prevE->next_edge = get_next_edge(E);
+	}
 }
 // remove_all_edges_to: removes all edges going towards node with name name
 void remove_all_edges_to(pnode G, char name)
