@@ -38,10 +38,26 @@ void print_graph(pnode G)
 	if (is_empty(G))
 		e_error();
 	else {
+		pnode rowNode = G;
 		double M[MAXNODES][MAXNODES];
-		for (int i = 0; i < n; i++)
-			for (int k = 0; k < n; k++)
-				M[i][k] = INFINITY;
+		for (int i = 0; i < n; i++){		
+			pnode columnNode = G;
+			for (int k = 0; k < n; k++){
+				if(get_edges(rowNode) != NULL && rowNode != columnNode){
+					pedge E = get_edges(rowNode);
+					while(E != NULL){
+						if(E->to == get_name(columnNode)){
+							M[i][k] = E->weight;
+						}
+						E = E->next_edge;
+					}
+				}else{
+					M[i][k] = INFINITY;
+				}
+				columnNode = get_next(columnNode);
+			}
+			rowNode = get_next(rowNode);
+		}
 		list_to_matrix(G, M);
 		print_matrix(G, M, n);
 	}

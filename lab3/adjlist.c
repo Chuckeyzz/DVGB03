@@ -209,6 +209,7 @@ void add_edge(pnode G, char from, char to, double weight)
 	//Traverse the nodes until we are on the correct from-node
 	while(get_name(G) != from){
 		G = get_next(G);
+
 		if(G == NULL){
 			return;
 		}
@@ -231,6 +232,7 @@ void add_edge(pnode G, char from, char to, double weight)
 		}
 		E = _add_edge(E, to, weight);
 		prevE->next_edge = E;
+
 	}
 }
 
@@ -309,6 +311,7 @@ void rem_edge(pnode G, char from, char to)
 			return;
 		}
 	}
+
 	//Get the first edge from the node
 	pedge E = get_edges(G);
 	pedge prevE = NULL;
@@ -323,6 +326,7 @@ void rem_edge(pnode G, char from, char to)
 			prevE = E;
 			E = get_next_edge(E);
 		}
+
 		//Get out of possible infinite loop
 		if(E == NULL){
 			return;
