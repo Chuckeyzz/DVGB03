@@ -10,8 +10,7 @@ pedge _rem_edge(pedge edges, char to);
 void remove_all_edges_to(pnode G, char name);
 void remove_all_edges_from(pnode G, char name);
 //private helper functions
-//static void print_graph_now(pnode G);
-//static void print_graph_edges(pnode G);
+static void print_graph_now(pnode G);
 
 // create_node: creates node with name nname
 pnode create_node(char nname)
@@ -219,9 +218,8 @@ pedge upd_edge(pedge E, double weight)
 // _add_edge: creates and connects new edge to edge-list
 pedge _add_edge(pedge E, char to, double weight)
 {
-	pedge newEdge = create_edge(to, weight);
-	newEdge->next_edge = E;
-	return newEdge;
+	E = create_edge(to, weight);
+	return E;
 }
 // add_edge: adds an edge to G by finding correct start node
 //           and then calling _add_edge to create new edge
@@ -424,7 +422,15 @@ int node_cardinality(pnode G)
 // name_to_pos: returns position of node with name c, -1 if not found
 int name_to_pos(pnode G, char c)
 {
-	// TODO
+	int index = 0;
+	while (G != NULL){
+		if (get_name(G) == c){
+			return index;  //returning pos of node
+		}
+		G = get_next(G);
+		index++;
+	}
+	//if node not found
 	return -1;
 }
 // pos_to_name: returns name of node at position pos in G
@@ -438,9 +444,29 @@ char pos_to_name(pnode G, int pos)
 // list_to_pos: creates adjacency matrix from adjacency list
 void list_to_matrix(pnode G, double matrix[MAXNODES][MAXNODES])
 {
-	// TODO
-}
+	for (int i = 0; i < MAXNODES; i++){
+		for (int j = 0; j < MAXNODES; j++){
+			matrix[i][j] = INFINITY;
+		}
+	}
+	int row = 0;
+	pnode current = G;
 
+	while(current != NULL){
+		pedge edge_list = get_edges(current);
+		while (edge_list != NULL){
+			char to = get_to(edge_list);
+			double weight = get_weight(edge_list);
+			int col = name_to_pos(G, to);
+			if(col != -1) {
+				matrix[row][col] = weight;
+			}
+			edge_list = get_next_edge(edge_list);
+		}
+		current = get_next(current);
+		row++;
+	}
+}
 //helper for printing the nodes, almost working
 static void print_graph_now(pnode G){
 	while (G != NULL){
