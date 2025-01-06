@@ -3,6 +3,26 @@
 #include "ui.h"
 #include "algorithm.h"
 bool echo = false;
+
+static void print_graph_edges(pnode G){
+    // Iterate over all nodes in the graph:
+    while (G != NULL)
+    {
+        char fromName = get_name(G);     // get the letter of the node
+        printf("Edges from node '%c': ", fromName);
+
+        pedge E = get_edges(G);         // get the head of the adjacency-list for this node
+        while (E != NULL)
+        {
+            printf("-> '%c' (weight=%.2f) ", E->to, E->weight);
+            E = E->next_edge;
+        }
+
+        printf("\n");
+        G = get_next(G);  // move to the next node in the list
+    }
+}
+
 pnode e_error(void)
 {
 	printf("Graph is empty\n");
@@ -43,7 +63,7 @@ void print_graph(pnode G)
 		for (int i = 0; i < n; i++){		
 			pnode columnNode = G;
 			for (int k = 0; k < n; k++){
-				if(get_edges(rowNode) != NULL && rowNode != columnNode){
+				if(get_edges(rowNode) != NULL){
 					pedge E = get_edges(rowNode);
 					while(E != NULL){
 						if(E->to == get_name(columnNode)){
@@ -63,6 +83,7 @@ void print_graph(pnode G)
 	}
 	printf("node cardinality: %d\n", node_cardinality(G));
 	printf("edge cardinality: %d\n", edge_cardinality(G));
+	print_graph_edges(G);
 }
 // prints the contents of integer array a from 0 up to size
 void print_array(double *a, int size)

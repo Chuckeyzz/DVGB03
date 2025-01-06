@@ -10,7 +10,8 @@ pedge _rem_edge(pedge edges, char to);
 void remove_all_edges_to(pnode G, char name);
 void remove_all_edges_from(pnode G, char name);
 //private helper functions
-static void print_graph_now(pnode G);
+//static void print_graph_now(pnode G);
+//static void print_graph_edges(pnode G);
 
 // create_node: creates node with name nname
 pnode create_node(char nname)
@@ -199,8 +200,9 @@ pedge upd_edge(pedge E, double weight)
 // _add_edge: creates and connects new edge to edge-list
 pedge _add_edge(pedge E, char to, double weight)
 {
-	E = create_edge(to, weight);
-	return E;
+	pedge newEdge = create_edge(to, weight);
+	newEdge->next_edge = E;
+	return newEdge;
 }
 // add_edge: adds an edge to G by finding correct start node
 //           and then calling _add_edge to create new edge
@@ -214,25 +216,34 @@ void add_edge(pnode G, char from, char to, double weight)
 			return;
 		}
 	}
+
 	pedge E = get_edges(G);
-	pedge prevE = E;
+	pedge prevE = NULL;
 	
-	if(E == NULL) {	
+	if(E == NULL){
 		E = create_edge(to, weight);
 		set_edges(G, E);
+		return;
 	}
-	else{
-		if(find_edge(G, from, to)){
-			upd_edge(E, weight);
-			return;
-		}
-		while(E->to < to && get_next_edge(E) != NULL){ //Traverse the edge-list to find the correct alphabetical order
-			prevE = E;
-			E = get_next_edge(E);	
-		}
-		E = _add_edge(E, to, weight);
-		prevE->next_edge = E;
 
+	if(find_edge(G, from, to)){
+		upd_edge(E, weight);
+		return;
+	}
+
+	pedge current = E;
+	while(current != NULL && current->to < to){
+		prevE = current;
+		current = current->next_edge;
+	}
+
+	if (prevE == NULL) {
+	    pedge newHead = _add_edge(current, to, weight);
+	    set_edges(G, newHead);
+	} else {
+	    // Insert in the middle or end
+	    pedge newE = _add_edge(current, to, weight);
+	    prevE->next_edge = newE;
 	}
 }
 
