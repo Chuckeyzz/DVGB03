@@ -10,7 +10,8 @@ pedge _rem_edge(pedge edges, char to);
 void remove_all_edges_to(pnode G, char name);
 void remove_all_edges_from(pnode G, char name);
 //private helper functions
-static void print_graph_now(pnode G);
+//static void print_graph_now(pnode G);
+//static void print_graph_edges(pnode G);
 
 // create_node: creates node with name nname
 pnode create_node(char nname)
@@ -218,8 +219,9 @@ pedge upd_edge(pedge E, double weight)
 // _add_edge: creates and connects new edge to edge-list
 pedge _add_edge(pedge E, char to, double weight)
 {
-	E = create_edge(to, weight);
-	return E;
+	pedge newEdge = create_edge(to, weight);
+	newEdge->next_edge = E;
+	return newEdge;
 }
 // add_edge: adds an edge to G by finding correct start node
 //           and then calling _add_edge to create new edge
