@@ -1,4 +1,5 @@
 #include "adjlist.h"
+#include <string.h>
 // local prototypes
 pnode create_node(char nname);
 pnode node_cons(pnode first, pnode second);
@@ -85,7 +86,9 @@ pnode node_cons(pnode first, pnode second)
 //           in graph, nothing is done
 pnode add_node(pnode G, char nname) {
 	//creates the node if node with the same name does not exist.
-	if(find_node(G, nname)) {return G;}
+	if(find_node(G, nname)) {
+		return G;
+	}
 	
 	pnode new_node = create_node(nname); 
 	if(G == NULL){
@@ -129,7 +132,7 @@ pnode get_node(pnode G, char name)
 			G = get_next(G);
 		}
 	}
-	printf("Node not in list.\n");
+	//printf("Node not in list.\n");
 	return NULL;
 }
 // get_node: returns true if node with name name exists in adjacency list G
@@ -187,7 +190,10 @@ pedge edge_cons(pedge first, pedge second)
 // upd_edge: updates edge E to new weight
 pedge upd_edge(pedge E, double weight)
 {
-	// TODO
+	if(E != NULL){
+		E->weight = weight;
+		return E;
+	}
 	return E;
 }
 // _add_edge: creates and connects new edge to edge-list
@@ -203,21 +209,33 @@ void add_edge(pnode G, char from, char to, double weight)
 	//Traverse the nodes until we are on the correct from-node
 	while(get_name(G) != from){
 		G = get_next(G);
-	}
 
+		if(G == NULL){
+			return;
+		}
+	}
 	pedge E = get_edges(G);
+	pedge prevE = E;
 	
-	if(E == NULL){	
+	if(E == NULL) {	
 		E = create_edge(to, weight);
 		set_edges(G, E);
-	}else{
-		while(get_next_edge(E) != NULL){ //Traverse the edge-list to the end
-			E = get_next_edge(E);
+	}
+	else{
+		if(find_edge(G, from, to)){
+			upd_edge(E, weight);
+			return;
 		}
-		
-		E->next_edge = _add_edge(E, to, weight);
+		while(E->to < to && get_next_edge(E) != NULL){ //Traverse the edge-list to find the correct alphabetical order
+			prevE = E;
+			E = get_next_edge(E);	
+		}
+		E = _add_edge(E, to, weight);
+		prevE->next_edge = E;
+
 	}
 }
+
 // _find_edge: finds edge in edge-list
 bool _find_edge(pedge E, char to)
 {
@@ -225,11 +243,21 @@ bool _find_edge(pedge E, char to)
 	return false;
 }
 // find_edge: returns true if edge between from and to exists, false otherwise
+//NOT WORKING, whyyyy??
 bool find_edge(pnode G, char from, char to)
 {
-	// TODO
+	pedge edgeList = G->edges;
+
+	//edgelist from is missing, add function does not handle this
+	while(edgeList != NULL) {
+		if(edgeList->to == to && get_name(G) == from) {
+			return true;
+		}
+		edgeList = get_next_edge(edgeList);
+	}
 	return false;
 }
+
 // _edge_cardinality: returns the number of edges from one node
 int _edge_cardinality(pedge E)
 {
@@ -275,11 +303,9 @@ pedge _rem_edge(pedge E, char to)
 // rem_edge: removes edge from G
 void rem_edge(pnode G, char from, char to)
 {
-	
 	//Loop through the nodes until we find the one that the edge goes from
 	while(get_name(G) != from){
 		G = get_next(G);
-
 		//Get out of possible infinite loop
 		if(G == NULL){
 			return;
@@ -289,12 +315,14 @@ void rem_edge(pnode G, char from, char to)
 	//Get the first edge from the node
 	pedge E = get_edges(G);
 	pedge prevE = NULL;
-	
 	//Check if that edge is the one we want to delete by checking if the to value of that edge is the to value from the parameter
 	if(get_to(E) == to){
-		set_edges(G, get_next_edge(E)); //if that is the case just make the edge after that in the edge-list the new edges value for the node
-	}else{
-		while(E != NULL && get_to(E) != to){ //Else if it is not the first edge in the edge list, traverse the edge-list to find the edge and save the edge before to prevE
+		set_edges(G, get_next_edge(E)); 
+	//if that is the case just make the edge after that in the edge-list the new edges value for the node
+	}
+	else{
+		while(E != NULL && get_to(E) != to){ 
+			//Else if it is not the first edge in the edge list, traverse the edge-list to find the edge and save the edge before to prevE
 			prevE = E;
 			E = get_next_edge(E);
 		}
@@ -303,7 +331,6 @@ void rem_edge(pnode G, char from, char to)
 		if(E == NULL){
 			return;
 		}
-		
 		prevE->next_edge = get_next_edge(E);
 	}
 }
