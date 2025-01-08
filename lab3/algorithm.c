@@ -39,24 +39,45 @@ double min(double a, double b)
 //--------------------------------------------------------------------------
 int Q_insert(queue Q, pnode u, int index)
 {
-	// TODO
-	return 0;
+	Q[index] = u;
+	index++;
+	return index;
 }
 int Q_is_empty(queue Q, int size)
 {
-	// TODO
-	return true;
+	if(!Q){return -1;}
+	return (size == 0) ? 1 : 0;
 }
 pnode Q_extract_min(queue Q, int size)
 {
-	// TODO
-	return NULL;
+	if(size == 0) {return NULL;}
+
+	int index = 0;
+	pnode smol_node = Q[0]; //set first node to smallest
+	
+	for (int i = 0; i < size; i++){
+		if(get_d(Q[i]) < get_d(smol_node)){
+			index = i;
+			smol_node = Q[i];
+		}
+	}
+	for(int i = index; i < size - 1; i++){
+		Q[i] = Q[i + 1];
+	}
+	Q[size - 1] = NULL;
+	return smol_node;
 }
 bool Q_exists(queue Q, int qsize, char name)
 {
-	// TODO
+	if(!Q){return false;}
+	for (int i = 0; i < qsize; i++){
+		if(Q[i] && get_name(Q[i]) == name){
+			return true;
+		}
+	}
 	return false;
 }
+
 //--------------------------------------------------------------------------
 // Dijkstra's algorithm, single source shortest path tree generator
 // a -> b(1) -> c(5)
@@ -65,7 +86,36 @@ bool Q_exists(queue Q, int qsize, char name)
 //--------------------------------------------------------------------------
 void dijkstra(pnode G, char s, double *d, char *e)
 {
-	// TODO
+	init_single_source(G, s); // initialize start node
+	queue Q = (queue)malloc(MAXNODES * sizeof(pnode)); //malloc our queueu
+	int size = 0;
+
+	pnode node = G;
+	while(node != NULL){
+		size = Q_insert(Q, node, size); //fill queue with all nodes from G
+		node = get_next(node);
+	}
+	
+	while (!Q_is_empty(Q, size)){
+		pnode u = Q_extract_min(Q, size); //extract the smallest weight edge from the startnode to find out where it goes
+		size--;
+
+		for(pedge edge = get_edges(u); edge != NULL; edge = edge->next_edge) {
+			
+			pnode v = get_node(G, edge->to); //get destination node v from curr edge  
+			relax(u, v, edge->weight);      //relax u and v 
+		}
+	}
+	int index = 0;
+	node = G;
+	while(!is_empty(node)){
+		//go through all nodes to update the best routes
+		d[index] = get_d(node);
+		e[index] = get_pi(node);
+		index++;
+		node = get_next(node);
+	}
+	free(Q); //FREEEEDOM
 }
 //--------------------------------------------------------------------------
 // Prim's algorithm - Minimum Spanning Tree generator
@@ -76,9 +126,53 @@ void dijkstra(pnode G, char s, double *d, char *e)
 //--------------------------------------------------------------------------
 void prim(pnode G, char start_node, double *d, char *e)
 {
-	// TODO
-}
+	pnode node = G; 
+	int size = 0;
+	queue Q = (queue)malloc(MAXNODES * sizeof(pnode)); //malloc our queue
+	//initialize start node 
+	pnode starter = get_node(G,start_node);
+	set_d(starter, 0);
+	
+	while(node != NULL) {
+		//make an empty node to keep track of distances and predecessors
+		if(node!= starter){
+			set_d(node, INFINITY);
+			set_pi(node, '-');
+		}
+		size = Q_insert(Q, node, size);
+		node = get_next(node);
+	}
 
+    // Process nodes
+    while (!Q_is_empty(Q, size)) {
+        pnode u = Q_extract_min(Q, size);
+        size--;
+
+        pedge edge = get_edges(u);
+        while (edge != NULL) {
+            pnode v = get_node(G, edge->to);
+            double weight = edge->weight;
+
+            if (v != NULL && weight < get_d(v)) {
+                set_d(v, weight);
+                set_pi(v, get_name(u));
+                if (!Q_exists(Q, size, get_name(v))) {
+                    size = Q_insert(Q, v, size);
+                }
+            }
+            edge = edge->next_edge;
+        }
+    }
+	int index = 0;
+	node = G;
+	while (node != NULL) {
+		d[index] = get_d(node);
+		e[index] = get_pi(node);
+		index++;
+		node = get_next(node);
+	}
+	free(Q);
+}
 //--------------------------------------------------------------------------
 // Floyd's algorithm: returns matrix of distances
 // a -> b(1)
@@ -89,7 +183,28 @@ void prim(pnode G, char start_node, double *d, char *e)
 //--------------------------------------------------------------------------
 void floyd(pnode G, double W[MAXNODES][MAXNODES])
 {
-	// TODO
+	int n = 0;
+
+	list_to_matrix(G,W);
+	pnode node = G;
+	while(!is_empty(node)){
+		n++;
+		node = get_next(node);
+	}
+
+	for (int i = 0; i < n; i++){
+		W[i][i] = 0;
+	}
+	
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++){
+			for (int k = 0; k < n; k++){
+				if(W[j][i] < INFINITY && W[i][k] < INFINITY) {
+					W[j][k] = min(W[j][k], W[j][i] + W[i][k]);
+				} 
+			}
+		}
+	}
 }
 //--------------------------------------------------------------------------
 // Warshall's algorithm: returns matrix of closures, i.e. if paths exists
@@ -101,5 +216,35 @@ void floyd(pnode G, double W[MAXNODES][MAXNODES])
 //--------------------------------------------------------------------------
 void warshall(pnode G, double W[MAXNODES][MAXNODES])
 {
-	// TODO
+	int n = 0; 
+	list_to_matrix(G,W);
+
+	pnode node = G;
+	while (!is_empty(node)){
+		n++;
+		node = get_next(node);
+	}
+	//handles self loops 
+	for (int i = 0; i < n; i++){
+		for (int j = 0; j < n; j++){
+			if(W[i][j] == INFINITY){
+				W[i][j] = 0;
+			}
+			else {
+				W[i][j] = 1;
+			}
+		}
+	}
+	//handles diagonal
+	for(int i = 0; i < n; i++){
+		W[i][i] = 1;
+	} 
+	
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++){
+			for (int k = 0; k < n; k++){
+				W[j][k] = W[j][k] || (W[j][i] && W[i][k]);
+			}
+		}
+	}
 }

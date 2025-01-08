@@ -10,8 +10,7 @@ pedge _rem_edge(pedge edges, char to);
 void remove_all_edges_to(pnode G, char name);
 void remove_all_edges_from(pnode G, char name);
 //private helper functions
-//static void print_graph_now(pnode G);
-//static void print_graph_edges(pnode G);
+static void print_graph_now(pnode G);
 
 // create_node: creates node with name nname
 pnode create_node(char nname)
@@ -111,16 +110,36 @@ pnode add_node(pnode G, char nname) {
 	//print_graph_now(G);
 	return G;
 }
-
 // rem_node: removes node with name name from adjacency list G
 //           if node does not exist, nothing happens
-pnode rem_node(pnode G, char name)
-{
-	if(!find_node(G, name)) return 0;
 
-	G = get_next(G);
-	
-	return G;
+pnode rem_node(pnode G, char name) {
+	if (!G) return NULL;  // Empty graph
+
+	pnode current = G;
+	pnode prev = NULL;
+
+	// Traverse the node list
+	while (current) {
+		if (get_name(current) == name) {
+			remove_all_edges_to(G, name);
+			remove_all_edges_from(G, name);
+
+			if (prev == NULL) { //if first node in list
+				G = get_next(current);
+			} 
+			else {
+				//update the prev node to skip curren node
+				prev->next_node = get_next(current);
+			}
+			//free the node and its edges
+			free(current);
+			return G;
+		}
+		prev = current;
+		current = get_next(current);
+	}
+	return G;  //for when node not found
 }
 // get_node: returns pointer to node with name name from adjacency list G
 pnode get_node(pnode G, char name)
@@ -140,9 +159,9 @@ pnode get_node(pnode G, char name)
 //           false otherwise
 bool find_node(pnode G, char name)
 { 
-	return is_empty(G)	       ? false  :
-	       get_name(G) == name ? true   :
-		   find_node(G->next_node, name);
+	return	is_empty(G)	        ? false  :
+			get_name(G) == name ? true   :
+			find_node(G->next_node, name);
 }
 // create_edge: creates edge
 pedge create_edge(char to, double weight)
@@ -192,61 +211,48 @@ pedge edge_cons(pedge first, pedge second)
 pedge upd_edge(pedge E, double weight)
 {
 	if(E != NULL){
-		E->weight = weight;
-		return E;
+		set_weight(E,weight);
 	}
 	return E;
 }
 // _add_edge: creates and connects new edge to edge-list
 pedge _add_edge(pedge E, char to, double weight)
 {
-	pedge newEdge = create_edge(to, weight);
-	newEdge->next_edge = E;
-	return newEdge;
+	E = create_edge(to, weight);
+	return E;
 }
 // add_edge: adds an edge to G by finding correct start node
 //           and then calling _add_edge to create new edge
 void add_edge(pnode G, char from, char to, double weight)
 {
 	//Traverse the nodes until we are on the correct from-node
-	while(get_name(G) != from){
+	while(G && get_name(G) != from){
 		G = get_next(G);
-
-		if(G == NULL){
-			return;
-		}
+		if(G == NULL) return; //preventing infinite loops
 	}
+	pedge current = get_edges(G);
+	pedge prev = NULL;
 
-	pedge E = get_edges(G);
-	pedge prevE = NULL;
-	
-	if(E == NULL){
-		E = create_edge(to, weight);
-		set_edges(G, E);
+	while(current && get_to(current) < to){
+		prev = current;
+		current = get_next_edge(current);
+	}
+	if(current && get_to(current) == to){
+		upd_edge(current, weight);
 		return;
 	}
-
-	if(find_edge(G, from, to)){
-		upd_edge(E, weight);
-		return;
+	pedge new_edge = create_edge(to, weight);
+	//putting new edge at the start
+	if(prev == NULL){
+		new_edge->next_edge = get_edges(G);
+		set_edges(G, new_edge);
 	}
-
-	pedge current = E;
-	while(current != NULL && current->to < to){
-		prevE = current;
-		current = current->next_edge;
-	}
-
-	if (prevE == NULL) {
-	    pedge newHead = _add_edge(current, to, weight);
-	    set_edges(G, newHead);
-	} else {
-	    // Insert in the middle or end
-	    pedge newE = _add_edge(current, to, weight);
-	    prevE->next_edge = newE;
+	//putting new edge in the mid or end
+	else{
+		new_edge->next_edge = current;
+		prev->next_edge = new_edge;
 	}
 }
-
 // _find_edge: finds edge in edge-list
 bool _find_edge(pedge E, char to)
 {
@@ -254,19 +260,24 @@ bool _find_edge(pedge E, char to)
 	return false;
 }
 // find_edge: returns true if edge between from and to exists, false otherwise
-//NOT WORKING, whyyyy??
-bool find_edge(pnode G, char from, char to)
-{
+bool find_edge(pnode G, char from, char to) {
+	if (G == NULL) {
+		return false; // Return false if the graph is NULL
+	}
+	while (G != NULL && get_name(G) != from) {
+		G = get_next(G);
+	}
+	if (G == NULL) {
+		return false;
+	}
 	pedge edgeList = G->edges;
-
-	//edgelist from is missing, add function does not handle this
-	while(edgeList != NULL) {
-		if(edgeList->to == to && get_name(G) == from) {
+	while (edgeList != NULL) {
+		if (edgeList->to == to) {
 			return true;
 		}
-		edgeList = get_next_edge(edgeList);
+		edgeList = get_next_edge(edgeList); 
 	}
-	return false;
+	return false; //edge not found
 }
 
 // _edge_cardinality: returns the number of edges from one node
@@ -283,27 +294,39 @@ int edge_cardinality(pnode G)
 		pedge E = get_edges(G); //Get the first edge in the nodes edge-list
 		while(E != NULL){ //Traverse the edge-list
 			counter++;
-			//printf("count is %d \n",counter);
 			E = get_next_edge(E);
 		}
 		G = get_next(G);
 	}
-	//printf("Final count is %d \n",counter);
 	return counter;
 }
 // _self_loops: returns the number of edges going back to
 //              source node
 int _self_loops(pedge E, char src)
 {
-	// TODO
-	return 0;
+	int counter = 0;
+
+	while (E != NULL){
+		if(get_to(E) == src){
+			counter++;
+		}
+		E = get_next_edge(E);
+	}
+	return counter;
 }
 // self_loops: counts the number of self-loops, i.e. edges to and from
 //             the same node
 int self_loops(pnode G)
 {
-	// TODO
-	return 0;
+	int loops = 0;
+	char source;
+
+	while(G != NULL){
+		source = get_name(G);
+		loops += _self_loops(get_edges(G), source);
+		G = get_next(G);
+	}
+	return loops;
 }
 // _rem_edge: removes edge from edge-list (Currently not used)
 pedge _rem_edge(pedge E, char to)
@@ -312,48 +335,77 @@ pedge _rem_edge(pedge E, char to)
 	return E;
 }
 // rem_edge: removes edge from G
-void rem_edge(pnode G, char from, char to)
-{
-	//Loop through the nodes until we find the one that the edge goes from
-	while(get_name(G) != from){
-		G = get_next(G);
-		//Get out of possible infinite loop
-		if(G == NULL){
-			return;
-		}
-	}
+void rem_edge(pnode G, char from, char to) {
+	
+    while (G && get_name(G) != from) {
+        G = get_next(G);
+    }
+    if (!G) {
+        return;
+    }
+    // Get the first edge from the node
+    pedge E = get_edges(G);
+    pedge prevE = NULL;
 
-	//Get the first edge from the node
-	pedge E = get_edges(G);
-	pedge prevE = NULL;
-	//Check if that edge is the one we want to delete by checking if the to value of that edge is the to value from the parameter
-	if(get_to(E) == to){
-		set_edges(G, get_next_edge(E)); 
-	//if that is the case just make the edge after that in the edge-list the new edges value for the node
-	}
-	else{
-		while(E != NULL && get_to(E) != to){ 
-			//Else if it is not the first edge in the edge list, traverse the edge-list to find the edge and save the edge before to prevE
-			prevE = E;
-			E = get_next_edge(E);
-		}
+    if (!E) {
+        return;
+    }
 
-		//Get out of possible infinite loop
-		if(E == NULL){
-			return;
-		}
-		prevE->next_edge = get_next_edge(E);
-	}
+    // Traverse the edge list to find the edge to remove
+    while (E) {
+        if (get_to(E) == to) {
+            if (prevE == NULL) {
+                set_edges(G, get_next_edge(E)); // Update the head of the edge list
+            }
+			else {
+                prevE->next_edge = get_next_edge(E); // Skip the current edge
+            }
+            free(E); // Free the edge memory
+            return;
+        }
+        prevE = E;
+        E = get_next_edge(E);
+    }
 }
 // remove_all_edges_to: removes all edges going towards node with name name
 void remove_all_edges_to(pnode G, char name)
 {
-	// TODO
+    while (G) {
+		pedge current = get_edges(G);
+        pedge prev = NULL;
+		
+		while (current) {
+			if (get_to(current) == name) {
+				if (prev == NULL) {
+					set_edges(G, get_next_edge(current));
+				}
+				else {
+					prev->next_edge = get_next_edge(current);
+                }
+				free(current);
+				break;
+            }
+			prev = current;
+			current = get_next_edge(current);
+		}
+		G = get_next(G);
+	}
 }
+
 // remove_all_edges_from: removes all edges from node with name name
 void remove_all_edges_from(pnode G, char name)
 {
-	// TODO
+	pnode node = get_node(G, name);
+	if (!node) return;
+
+
+	pedge current = get_edges(node);
+
+	while (current) {
+		pedge next = get_next_edge(current);
+		free(current);
+		current = next;
+	}
 }
 // node_cardinality: returns the number of nodes in G
 int node_cardinality(pnode G)
@@ -370,7 +422,15 @@ int node_cardinality(pnode G)
 // name_to_pos: returns position of node with name c, -1 if not found
 int name_to_pos(pnode G, char c)
 {
-	// TODO
+	int index = 0;
+	while (G != NULL){
+		if (get_name(G) == c){
+			return index;  //returning pos of node
+		}
+		G = get_next(G);
+		index++;
+	}
+	//if node not found
 	return -1;
 }
 // pos_to_name: returns name of node at position pos in G
@@ -384,9 +444,29 @@ char pos_to_name(pnode G, int pos)
 // list_to_pos: creates adjacency matrix from adjacency list
 void list_to_matrix(pnode G, double matrix[MAXNODES][MAXNODES])
 {
-	// TODO
-}
+	for (int i = 0; i < MAXNODES; i++){
+		for (int j = 0; j < MAXNODES; j++){
+			matrix[i][j] = INFINITY;
+		}
+	}
+	int row = 0;
+	pnode current = G;
 
+	while(current != NULL){
+		pedge edge_list = get_edges(current);
+		while (edge_list != NULL){
+			char to = get_to(edge_list);
+			double weight = get_weight(edge_list);
+			int col = name_to_pos(G, to);
+			if(col != -1) {
+				matrix[row][col] = weight;
+			}
+			edge_list = get_next_edge(edge_list);
+		}
+		current = get_next(current);
+		row++;
+	}
+}
 //helper for printing the nodes, almost working
 static void print_graph_now(pnode G){
 	while (G != NULL){
