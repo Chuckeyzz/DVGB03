@@ -126,46 +126,66 @@ void dijkstra(pnode G, char s, double *d, char *e)
 //--------------------------------------------------------------------------
 void prim(pnode G, char start_node, double *d, char *e)
 {
+	if(!G) return;
+	
 	pnode node = G; 
 	int size = 0;
 	queue Q = (queue)malloc(MAXNODES * sizeof(pnode)); //malloc our queue
-	//initialize start node 
-	pnode starter = get_node(G,start_node);
-	set_d(starter, 0);
 	
 	while(node != NULL) {
 		//make an empty node to keep track of distances and predecessors
-		if(node!= starter){
-			set_d(node, INFINITY);
-			set_pi(node, '-');
-		}
+		set_d(node, INFINITY);
+		set_pi(node, '-');
 		size = Q_insert(Q, node, size);
 		node = get_next(node);
 	}
-
-    // Process nodes
+	
+	//initialize start node 
+	pnode starter = get_node(G,start_node);
+	if (starter) {
+        set_d(starter, 0);
+    }
+	
+    // Main Prim's algorithm loop
     while (!Q_is_empty(Q, size)) {
         pnode u = Q_extract_min(Q, size);
+        if (!u) break;
         size--;
-
-        pedge edge = get_edges(u);
-        while (edge != NULL) {
-            pnode v = get_node(G, edge->to);
-            double weight = edge->weight;
-
-            if (v != NULL && weight < get_d(v)) {
-                set_d(v, weight);
-                set_pi(v, get_name(u));
-                if (!Q_exists(Q, size, get_name(v))) {
-                    size = Q_insert(Q, v, size);
+        
+        // Check all nodes to find connected edges
+        pnode current = G;
+        while (current != NULL) {
+            pedge edge = get_edges(current);
+            while (edge != NULL) {
+                // Check if this edge connects to our current node u
+                if (edge->to == get_name(u) || get_name(current) == get_name(u)) {
+                    pnode v;
+					if (edge->to == get_name(u)) {
+					    v = current;
+					} else {
+					    v = get_node(G, edge->to);
+					}
+                    
+                    if (v && Q_exists(Q, size, get_name(v))) {
+                        double weight = edge->weight;
+                        if (weight < get_d(v)) {
+	                        set_d(v, weight);
+                            set_pi(v, get_name(u));
+                        }
+                    }
                 }
+                edge = edge->next_edge;
             }
-            edge = edge->next_edge;
+            current = get_next(current);
         }
     }
+	
 	int index = 0;
 	node = G;
 	while (node != NULL) {
+		if(get_d(node) == 0){
+			set_d(node, INFINITY);
+		}
 		d[index] = get_d(node);
 		e[index] = get_pi(node);
 		index++;
