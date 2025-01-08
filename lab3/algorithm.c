@@ -183,7 +183,28 @@ void prim(pnode G, char start_node, double *d, char *e)
 //--------------------------------------------------------------------------
 void floyd(pnode G, double W[MAXNODES][MAXNODES])
 {
-	// TODO
+	int n = 0;
+
+	list_to_matrix(G,W);
+	pnode node = G;
+	while(!is_empty(node)){
+		n++;
+		node = get_next(node);
+	}
+
+	for (int i = 0; i < n; i++){
+		W[i][i] = 0;
+	}
+	
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++){
+			for (int k = 0; k < n; k++){
+				if(W[j][i] < INFINITY && W[i][k] < INFINITY) {
+					W[j][k] = min(W[j][k], W[j][i] + W[i][k]);
+				} 
+			}
+		}
+	}
 }
 //--------------------------------------------------------------------------
 // Warshall's algorithm: returns matrix of closures, i.e. if paths exists
@@ -195,5 +216,35 @@ void floyd(pnode G, double W[MAXNODES][MAXNODES])
 //--------------------------------------------------------------------------
 void warshall(pnode G, double W[MAXNODES][MAXNODES])
 {
-	// TODO
+	int n = 0; 
+	list_to_matrix(G,W);
+
+	pnode node = G;
+	while (!is_empty(node)){
+		n++;
+		node = get_next(node);
+	}
+	//handles self loops 
+	for (int i = 0; i < n; i++){
+		for (int j = 0; j < n; j++){
+			if(W[i][j] == INFINITY){
+				W[i][j] = 0;
+			}
+			else {
+				W[i][j] = 1;
+			}
+		}
+	}
+	//handles diagonal
+	for(int i = 0; i < n; i++){
+		W[i][i] = 1;
+	} 
+	
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++){
+			for (int k = 0; k < n; k++){
+				W[j][k] = W[j][k] || (W[j][i] && W[i][k]);
+			}
+		}
+	}
 }
